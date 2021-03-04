@@ -21,5 +21,5 @@ select min(price) as "Min Price", max(price) as "Max price"
 select *
     from books
         inner join category
-            on books.id=category.id
+            on books.type_id=category.id
     where category.cat_name='Fantasy';
