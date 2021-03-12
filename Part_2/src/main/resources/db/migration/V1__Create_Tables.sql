@@ -7,9 +7,9 @@ create table books (
 	author_name text,
 	year smallint,
 	publisher text,
-	cost money,
-	price money,
-	profit money
+	cost numeric(10, 2),
+	price numeric(10, 2),
+	profit numeric(10, 2)
 );
 
 insert into books (book_name, author_name, author_surname, year, publisher, cost, price, profit) values

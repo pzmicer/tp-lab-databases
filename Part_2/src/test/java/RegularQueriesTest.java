@@ -1,4 +1,6 @@
 import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
@@ -11,18 +13,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RegularQueriesTest {
 
-    private Flyway flyway;
-    private RegularQueries regularQueries;
+    private static Flyway flyway;
+    private static RegularQueries regularQueries;
 
-    public RegularQueriesTest() {
+    @BeforeAll
+    static void initialize() {
         try {
             Properties properties = new Properties();
             FileReader reader = new FileReader("database.properties");
             properties.load(reader);
-            this.flyway = Flyway.configure().dataSource(
-                    properties.getProperty("url"),
-                    properties.getProperty("user"),
-                    properties.getProperty("password")).load();
+            flyway = Flyway.configure().dataSource(
+                properties.getProperty("url"),
+                properties.getProperty("user"),
+                properties.getProperty("password")).load();
             flyway.migrate();
             regularQueries = new RegularQueries();
         } catch (Exception e ) {
@@ -46,9 +49,8 @@ class RegularQueriesTest {
         try {
             ResultSet set = regularQueries.getIdNameYearCategory();
             int k = 0;
-            while (set.next()) {
+            while (set.next())
                 k++;
-            }
             assertEquals(k, 5);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,12 +96,21 @@ class RegularQueriesTest {
         try {
             ResultSet set = regularQueries.getFantasyBooks();
             int k = 0;
-            while (set.next()) {
+            while (set.next())
                 k++;
-            }
             assertEquals(k, 3);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @AfterAll
+    static void clean() {
+        try {
+            regularQueries.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        flyway.clean();
     }
 }

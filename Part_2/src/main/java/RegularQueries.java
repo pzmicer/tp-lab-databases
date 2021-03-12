@@ -1,4 +1,3 @@
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
@@ -8,8 +7,7 @@ public class RegularQueries implements AutoCloseable {
 
     private Properties properties = new Properties();
     private Connection connection;
-
-    private String[] queries = {
+    private String[] queriesSQL = {
             """
         select *
             from books
@@ -42,14 +40,14 @@ public class RegularQueries implements AutoCloseable {
         FileReader reader = new FileReader(pathToProperties);
         properties.load(reader);
         connection = DriverManager.getConnection(
-                properties.getProperty("url"),
-                properties.getProperty("user"),
-                properties.getProperty("password"));
+            properties.getProperty("url"),
+            properties.getProperty("user"),
+            properties.getProperty("password"));
         reader.close();
     }
 
     public RegularQueries() throws IOException, SQLException {
-        new RegularQueries("database.properties");
+        this("database.properties");
     }
 
     private ResultSet executeQuery(String query) throws SQLException {
@@ -72,31 +70,31 @@ public class RegularQueries implements AutoCloseable {
     }
 
     public ResultSet getBySurname() throws SQLException {
-        return executeQuery(queries[0]);
+        return executeQuery(queriesSQL[0]);
     }
 
     public ResultSet getIdNameYearCategory() throws SQLException {
-        return executeQuery(queries[1]);
+        return executeQuery(queriesSQL[1]);
     }
 
     public ResultSet countBooksByPrice() throws SQLException {
-        return executeQuery(queries[2]);
+        return executeQuery(queriesSQL[2]);
     }
 
     public ResultSet sumProfitByYear() throws SQLException {
-        return executeQuery(queries[3]);
+        return executeQuery(queriesSQL[3]);
     }
 
     public ResultSet minMaxBookPrice() throws SQLException {
-        return executeQuery(queries[4]);
+        return executeQuery(queriesSQL[4]);
     }
 
     public ResultSet getFantasyBooks() throws SQLException {
-        return executeQuery(queries[5]);
+        return executeQuery(queriesSQL[5]);
     }
 
     public String[] getQueries() throws SQLException {
-        return queries;
+        return queriesSQL;
     }
 
     @Override

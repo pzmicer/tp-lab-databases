@@ -1,15 +1,35 @@
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ORMQueriesTest {
 
-    ORMQueries ormQueries;
+    private static Flyway flyway;
+    private static ORMQueries ormQueries;
 
-    ORMQueriesTest() {
-        ormQueries = new ORMQueries();
+    @BeforeAll
+    static void initialize() {
+        try {
+            Properties properties = new Properties();
+            FileReader reader = new FileReader("database.properties");
+            properties.load(reader);
+            flyway = Flyway.configure().dataSource(
+                    properties.getProperty("url"),
+                    properties.getProperty("user"),
+                    properties.getProperty("password")).load();
+            flyway.migrate();
+            ormQueries = new ORMQueries();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -47,5 +67,10 @@ class ORMQueriesTest {
     void getFantasyBooks() {
         var result = ormQueries.getFantasyBooks();
         assertEquals(result.size(), 3);
+    }
+
+    @AfterAll
+    static void clean() {
+        flyway.clean();
     }
 }
