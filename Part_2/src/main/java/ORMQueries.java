@@ -1,12 +1,11 @@
-import jdk.jfr.Category;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import postgreEntities.BooksEntity;
-import postgreEntities.CategoryEntity;
+import models.hibernate.BooksEntity;
+import models.hibernate.CategoryEntity;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -58,10 +57,10 @@ public class ORMQueries {
     }
 
     public Long countBooksByPrice() {
-        Long result = (Long) select("""
+        Long result = (Long) selectSingle("""
             select count(*)
                 from BooksEntity
-                where price=20.00""").get(0);
+                where price=20.00""");
         return result;
     }
 

@@ -1,4 +1,4 @@
-package postgreEntities;
+package models.hibernate;
 
 import javax.persistence.*;
 import java.util.Objects;

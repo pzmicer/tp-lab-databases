@@ -9,7 +9,7 @@
         <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.show_sql">true</property>
         
-        <mapping class="postgreEntities.BooksEntity"/>
-        <mapping class="postgreEntities.CategoryEntity"/>
+        <mapping class="models.hibernate.BooksEntity"/>
+        <mapping class="models.hibernate.CategoryEntity"/>
     </session-factory>
 </hibernate-configuration>

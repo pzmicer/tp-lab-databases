@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -34,83 +33,45 @@ class RegularQueriesTest {
     }
 
     @Test
-    public void getBySurnameTest() {
-        try {
-            ResultSet set = regularQueries.getBySurname();
-            assertTrue(set.next());
-            assertEquals(set.getString(2), "Witcher");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void getBySurname() throws SQLException {
+        var result = regularQueries.getBySurname();
+        assertEquals(result.get(0).getBookName(), "Witcher");
     }
 
     @Test
-    public void getIdNameYearCategoryTest() {
-        try {
-            ResultSet set = regularQueries.getIdNameYearCategory();
-            int k = 0;
-            while (set.next())
-                k++;
-            assertEquals(k, 5);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void getIdNameYearCategory() throws SQLException {
+        var result = regularQueries.getIdNameYearCategory();
+        assertEquals(result.size(), 5);
     }
 
     @Test
-    public void countBooksByPriceTest() {
-        try {
-            ResultSet set = regularQueries.countBooksByPrice();
-            assertTrue(set.next());
-            assertEquals(set.getInt(1), 1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void countBooksByPrice() throws SQLException {
+        var result = regularQueries.countBooksByPrice();
+        assertEquals(result, 1);
     }
 
     @Test
-    public void sumProfitByYearTest() {
-        try {
-            ResultSet set = regularQueries.sumProfitByYear();
-            assertTrue(set.next());
-            assertEquals(set.getBigDecimal(1), BigDecimal.valueOf(24000,2));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void sumProfitByYear() throws SQLException {
+        var result = regularQueries.sumProfitByYear();
+        assertEquals(result, BigDecimal.valueOf(24000,2));
     }
 
     @Test
-    public void minMaxBookPriceTest() {
-        try {
-            ResultSet set = regularQueries.minMaxBookPrice();
-            assertTrue(set.next());
-            assertEquals(set.getBigDecimal(1), BigDecimal.valueOf(800,2));
-            assertEquals(set.getBigDecimal(2), BigDecimal.valueOf(3000,2));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void minMaxBookPrice() throws SQLException {
+        var result = regularQueries.minMaxBookPrice();
+        assertEquals(result[0], BigDecimal.valueOf(800,2));
+        assertEquals(result[1], BigDecimal.valueOf(3000,2));
     }
 
     @Test
-    public void getFantasyBooksTest() {
-        try {
-            ResultSet set = regularQueries.getFantasyBooks();
-            int k = 0;
-            while (set.next())
-                k++;
-            assertEquals(k, 3);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    void getFantasyBooks() throws SQLException {
+        var result = regularQueries.getFantasyBooks();
+        assertEquals(result.size(), 3);
     }
 
     @AfterAll
-    static void clean() {
-        try {
-            regularQueries.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    static void clean() throws SQLException {
+        regularQueries.close();
         flyway.clean();
     }
 }

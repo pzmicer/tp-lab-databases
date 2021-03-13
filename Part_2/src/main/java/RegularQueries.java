@@ -1,40 +1,18 @@
+import models.sql.Book;
+import models.sql.Category;
+
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class RegularQueries implements AutoCloseable {
 
     private Properties properties = new Properties();
     private Connection connection;
-    private String[] queriesSQL = {
-            """
-        select *
-            from books
-            where author_surname ilike 'S%';""",
-            """
-        select books.id, book_name, year, cat_name
-            from books
-                left join category
-                    on books.type_id=category.id;""",
-            """
-        select count(*)
-            from books
-            where price='20';""",
-            """
-        select sum(profit)
-            from books
-            where year > 2017;""",
-            """
-        select min(price) as "Min Price", max(price) as "Max price"
-            from books;""",
-            """
-        select *
-            from books
-                inner join category
-                    on books.type_id=category.id
-            where category.cat_name='Fantasy';"""
-    };
 
     public RegularQueries(String pathToProperties) throws IOException, SQLException {
         FileReader reader = new FileReader(pathToProperties);
@@ -50,51 +28,119 @@ public class RegularQueries implements AutoCloseable {
         this("database.properties");
     }
 
-    private ResultSet executeQuery(String query) throws SQLException {
+    private ResultSet select(@org.intellij.lang.annotations.Language("SQL") String query) throws SQLException {
         Statement statement = connection.createStatement();
         return statement.executeQuery(query);
     }
 
-    public void printResultSet(ResultSet result) throws SQLException {
-            ResultSetMetaData rsmd = result.getMetaData();
-            int columnCount = rsmd.getColumnCount();
-            while (result.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    if (i > 1)
-                        System.out.print(",  ");
-                    System.out.print(result.getString(i) + " " + rsmd.getColumnName(i));
-                }
-                System.out.println();
-            }
-            System.out.println();
+    public List<Book> getBySurname() throws SQLException {
+        ResultSet rs = select("""
+            select *
+                from books
+                where author_surname ilike 'S%';""");
+        List<Book> result = new ArrayList<>();
+        while (rs.next()) {
+            Book book = new Book();
+            book.setId(rs.getLong("id"));
+            book.setBookName(rs.getString("book_name"));
+            book.setAuthorSurname(rs.getString("author_surname"));
+            book.setAuthorName(rs.getString("author_name"));
+            book.setYear(rs.getShort("year"));
+            book.setPublisher(rs.getString("publisher"));
+            book.setCost(rs.getBigDecimal("cost"));
+            book.setPrice(rs.getBigDecimal("price"));
+            book.setProfit(rs.getBigDecimal("profit"));
+            book.setTypeId(rs.getInt("type_id"));
+            result.add(book);
+        }
+        return result;
     }
 
-    public ResultSet getBySurname() throws SQLException {
-        return executeQuery(queriesSQL[0]);
+    public List<Object[]> getIdNameYearCategory() throws SQLException {
+        ResultSet rs = select( """
+            select books.id, book_name, year, cat_name
+                from books
+                    left join category
+                        on books.type_id=category.id;""");
+        List<Object[]> result = new ArrayList<>();
+        while (rs.next()) {
+            ArrayList<Object> array = new ArrayList<>();
+            array.add(rs.getLong("id"));
+            array.add(rs.getString("book_name"));
+            array.add(rs.getShort("year"));
+            array.add(rs.getString("cat_name"));
+            result.add(array.toArray());
+        }
+        return result;
     }
 
-    public ResultSet getIdNameYearCategory() throws SQLException {
-        return executeQuery(queriesSQL[1]);
+    public Long countBooksByPrice() throws SQLException {
+        ResultSet rs = select( """
+            select count(*)
+                from books
+                where price='20';""");
+        Long result = null;
+        if (rs.next()) {
+            result = rs.getLong(1);
+        }
+        return result;
     }
 
-    public ResultSet countBooksByPrice() throws SQLException {
-        return executeQuery(queriesSQL[2]);
+    public BigDecimal sumProfitByYear() throws SQLException {
+        ResultSet rs = select( """
+            select sum(profit)
+                from books
+                where year > 2017;""");
+        BigDecimal result = null;
+        if (rs.next()) {
+            result = rs.getBigDecimal(1);
+        }
+        return result;
     }
 
-    public ResultSet sumProfitByYear() throws SQLException {
-        return executeQuery(queriesSQL[3]);
+    public BigDecimal[] minMaxBookPrice() throws SQLException {
+        ResultSet rs = select( """
+            select min(price) as "Min Price", max(price) as "Max price"
+                from books;""");
+        BigDecimal[] result = new BigDecimal[2];
+        if (rs.next()) {
+            result[0] = rs.getBigDecimal(1);
+            result[1] = rs.getBigDecimal(2);
+        }
+        return result;
     }
 
-    public ResultSet minMaxBookPrice() throws SQLException {
-        return executeQuery(queriesSQL[4]);
-    }
+    public List<Object[]> getFantasyBooks() throws SQLException {
+        ResultSet rs = select("""
+            select 
+                books.id as id1, book_name, author_surname, author_name, year, publisher, cost, price, profit, type_id,
+                category.id as id2, cat_name, cat_description
+                from books
+                    inner join category
+                        on books.type_id=category.id
+                where category.cat_name='Fantasy';""");
+        List<Object[]> result = new ArrayList<>();
+        while (rs.next()) {
+            Book book = new Book();
+            book.setId(rs.getLong("id1"));
+            book.setBookName(rs.getString("book_name"));
+            book.setAuthorSurname(rs.getString("author_surname"));
+            book.setAuthorName(rs.getString("author_name"));
+            book.setYear(rs.getShort("year"));
+            book.setPublisher(rs.getString("publisher"));
+            book.setCost(rs.getBigDecimal("cost"));
+            book.setPrice(rs.getBigDecimal("price"));
+            book.setProfit(rs.getBigDecimal("profit"));
+            book.setTypeId(rs.getInt("type_id"));
 
-    public ResultSet getFantasyBooks() throws SQLException {
-        return executeQuery(queriesSQL[5]);
-    }
+            Category category = new Category();
+            category.setId(rs.getLong("id2"));
+            category.setCatName(rs.getString("cat_name"));
+            category.setCatDescription(rs.getString("cat_description"));
 
-    public String[] getQueries() throws SQLException {
-        return queriesSQL;
+            result.add(new Object[] {book, category});
+        }
+        return result;
     }
 
     @Override
