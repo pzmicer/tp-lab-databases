@@ -1,0 +1,6 @@
+#My .gitignore
+
+.idea/
+target/
+
+*.iml
