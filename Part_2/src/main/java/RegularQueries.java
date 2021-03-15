@@ -1,5 +1,7 @@
+import models.IdNameYearCategory;
 import models.sql.Book;
 import models.sql.Category;
+import org.javatuples.Pair;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -56,20 +58,20 @@ public class RegularQueries implements AutoCloseable {
         return result;
     }
 
-    public List<Object[]> getIdNameYearCategory() throws SQLException {
+    public List<IdNameYearCategory> getIdNameYearCategory() throws SQLException {
         ResultSet rs = select( """
             select books.id, book_name, year, cat_name
                 from books
                     left join category
                         on books.type_id=category.id;""");
-        List<Object[]> result = new ArrayList<>();
+        List<IdNameYearCategory> result = new ArrayList<>();
         while (rs.next()) {
-            ArrayList<Object> array = new ArrayList<>();
-            array.add(rs.getLong("id"));
-            array.add(rs.getString("book_name"));
-            array.add(rs.getShort("year"));
-            array.add(rs.getString("cat_name"));
-            result.add(array.toArray());
+            IdNameYearCategory struct = new IdNameYearCategory();
+            struct.setId(rs.getLong("id"));
+            struct.setBook_name(rs.getString("book_name"));
+            struct.setYear(rs.getShort("year"));
+            struct.setCat_name(rs.getString("cat_name"));
+            result.add(struct);
         }
         return result;
     }
@@ -110,7 +112,7 @@ public class RegularQueries implements AutoCloseable {
         return result;
     }
 
-    public List<Object[]> getFantasyBooks() throws SQLException {
+    public List<Pair<Book, Category>> getFantasyBooks() throws SQLException {
         ResultSet rs = select("""
             select 
                 books.id as id1, book_name, author_surname, author_name, year, publisher, cost, price, profit, type_id,
@@ -119,7 +121,7 @@ public class RegularQueries implements AutoCloseable {
                     inner join category
                         on books.type_id=category.id
                 where category.cat_name='Fantasy';""");
-        List<Object[]> result = new ArrayList<>();
+        List<Pair<Book, Category>> result = new ArrayList<>();
         while (rs.next()) {
             Book book = new Book();
             book.setId(rs.getLong("id1"));
@@ -138,7 +140,7 @@ public class RegularQueries implements AutoCloseable {
             category.setCatName(rs.getString("cat_name"));
             category.setCatDescription(rs.getString("cat_description"));
 
-            result.add(new Object[] {book, category});
+            result.add(new Pair<>(book, category));
         }
         return result;
     }

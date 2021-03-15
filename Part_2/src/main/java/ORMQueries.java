@@ -1,3 +1,4 @@
+import models.IdNameYearCategory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -6,6 +7,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import models.hibernate.BooksEntity;
 import models.hibernate.CategoryEntity;
+import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -47,9 +49,9 @@ public class ORMQueries {
         return result;
     }
 
-    public List<Object[]> getIdNameYearCategory() {
-        List<Object[]> result = select("""
-            select b.id, b.bookName, b.year, c.catName 
+    public List<IdNameYearCategory> getIdNameYearCategory() {
+        List<IdNameYearCategory> result = select("""
+            select new models.IdNameYearCategory(b.id, b.bookName, b.year, c.catName) 
                 from BooksEntity b
                     left join CategoryEntity c
                         on b.typeId =c.id""");
@@ -79,12 +81,13 @@ public class ORMQueries {
         return Arrays.stream(result).toArray(BigDecimal[]::new);
     }
 
-    public List<Object[]> getFantasyBooks() {
-        List<Object[]> result = select("""
-            from BooksEntity b
-                inner join CategoryEntity c
-                    on b.typeId=c.id
-            where c.catName='Fantasy'""");
+    public List<Pair<BooksEntity, CategoryEntity>> getFantasyBooks() {
+        List<Pair<BooksEntity, CategoryEntity>> result = select("""
+            select new org.javatuples.Pair(b, c)
+                from BooksEntity b
+                    inner join CategoryEntity c
+                        on b.typeId=c.id
+                where c.catName='Fantasy'""");
         return result;
     }
 }

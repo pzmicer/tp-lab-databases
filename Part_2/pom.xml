@@ -41,6 +41,18 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.18</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -53,9 +65,6 @@
                     <url>jdbc:postgresql://localhost:5432/postgres</url>
                     <user>postgres</user>
                     <password>1234</password>
-                    <!--<schemas>
-                        <schema>public</schema>
-                    </schemas>-->
                 </configuration>
             </plugin>
             <plugin>
